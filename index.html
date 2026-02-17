@@ -17,30 +17,30 @@
           <select id="deckSelect"></select>
         </label>
         <button id="loadDeckBtn" class="btn primary">Load</button>
-      </div>
-      <div class="top-bar-center">
-        <div class="view-toggle">
-          <button id="studyViewBtn" class="btn tertiary view-btn active">Study</button>
-          <button id="overviewViewBtn" class="btn tertiary view-btn">Overview</button>
-        </div>
-      </div>
-      <div class="top-bar-right">
-        <label class="field toggle-field">
-          <span class="field-label">Random</span>
-          <input type="checkbox" id="shuffleToggle" />
-        </label>
+
         <label class="field">
           <span class="field-label">Topic</span>
           <select id="topicFilter"></select>
         </label>
-        <label class="field toggle-field">
-          <span class="field-label">Unknown only</span>
-          <input type="checkbox" id="unknownOnlyToggle" />
-        </label>
+
+        <div class="toggles-group">
+          <button id="randomToggleBtn" class="btn tertiary toggle-pill" type="button">
+            Random: <span class="toggle-state">Off</span>
+          </button>
+          <button id="unknownOnlyBtn" class="btn tertiary toggle-pill" type="button">
+            Unknown only: <span class="toggle-state">Off</span>
+          </button>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <div class="view-toggle">
+          <button id="studyViewBtn" class="btn tertiary view-btn active" type="button">Study</button>
+          <button id="overviewViewBtn" class="btn tertiary view-btn" type="button">Overview</button>
+        </div>
       </div>
     </header>
 
-    <main class="main-layout">
+    <main class="main-layout deck-panel-collapsed">
       <section id="studySection" class="card-section">
         <div class="card-meta">
           <span id="topicLabel" class="topic-label">Topic</span>
@@ -177,6 +177,10 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <button id="deckPanelToggle" class="btn tertiary deck-toggle-btn" type="button">
+    Show decks
+  </button>
 
   <script src="app.js"></script>
 </body>

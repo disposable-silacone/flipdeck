@@ -63,9 +63,10 @@
   function cacheDom() {
     els.deckSelect = document.getElementById('deckSelect');
     els.loadDeckBtn = document.getElementById('loadDeckBtn');
-    els.shuffleToggle = document.getElementById('shuffleToggle');
     els.topicFilter = document.getElementById('topicFilter');
-    els.unknownOnlyToggle = document.getElementById('unknownOnlyToggle');
+
+    els.randomToggleBtn = document.getElementById('randomToggleBtn');
+    els.unknownOnlyBtn = document.getElementById('unknownOnlyBtn');
 
     els.studyViewBtn = document.getElementById('studyViewBtn');
     els.overviewViewBtn = document.getElementById('overviewViewBtn');
@@ -100,6 +101,9 @@
     els.topicStatsBody = document.getElementById('topicStatsBody');
     els.cardsTableBody = document.getElementById('cardsTableBody');
     els.resetStatsBtn = document.getElementById('resetStatsBtn');
+
+    els.mainLayout = document.querySelector('.main-layout');
+    els.deckPanelToggle = document.getElementById('deckPanelToggle');
   }
 
   function attachEventListeners() {
@@ -114,12 +118,14 @@
       loadDeck(deckId);
     });
 
-    els.shuffleToggle.addEventListener('change', () => {
-      state.shuffleEnabled = !!els.shuffleToggle.checked;
-      saveSettingsToDb();
-      rebuildWorkingSet();
-      applyFilters();
-    });
+    if (els.randomToggleBtn) {
+      els.randomToggleBtn.addEventListener('click', () => {
+        state.shuffleEnabled = !state.shuffleEnabled;
+        applySettingsToControls();
+        saveSettingsToDb();
+        applyFilters();
+      });
+    }
 
     els.topicFilter.addEventListener('change', () => {
       const value = els.topicFilter.value;
@@ -128,11 +134,14 @@
       applyFilters();
     });
 
-    els.unknownOnlyToggle.addEventListener('change', () => {
-      state.unknownOnly = !!els.unknownOnlyToggle.checked;
-      saveSettingsToDb();
-      applyFilters();
-    });
+    if (els.unknownOnlyBtn) {
+      els.unknownOnlyBtn.addEventListener('click', () => {
+        state.unknownOnly = !state.unknownOnly;
+        applySettingsToControls();
+        saveSettingsToDb();
+        applyFilters();
+      });
+    }
 
     els.studyViewBtn.addEventListener('click', () => setViewMode('study'));
     els.overviewViewBtn.addEventListener('click', () => setViewMode('overview'));
@@ -181,6 +190,15 @@
       els.resetStatsBtn.addEventListener('click', () => {
         resetCurrentDeckStats();
       });
+    }
+
+    if (els.deckPanelToggle && els.mainLayout) {
+      els.deckPanelToggle.addEventListener('click', () => {
+        const collapsed = els.mainLayout.classList.toggle('deck-panel-collapsed');
+        els.deckPanelToggle.textContent = collapsed ? 'Show decks' : 'Hide decks';
+      });
+      const initiallyCollapsed = els.mainLayout.classList.contains('deck-panel-collapsed');
+      els.deckPanelToggle.textContent = initiallyCollapsed ? 'Show decks' : 'Hide decks';
     }
   }
 
@@ -708,9 +726,8 @@
   }
 
   function applySettingsToControls() {
-    els.shuffleToggle.checked = !!state.shuffleEnabled;
-    els.unknownOnlyToggle.checked = !!state.unknownOnly;
     // topic dropdown is wired during buildTopicFilterOptions
+    updateToggleButtons();
   }
 
   // ---------------------------------------------------------------------------
@@ -954,6 +971,26 @@
     showToast._timeout = window.setTimeout(() => {
       els.toast.classList.remove('show');
     }, 3000);
+  }
+
+  function updateToggleButtons() {
+    if (els.randomToggleBtn) {
+      const randomOn = !!state.shuffleEnabled;
+      els.randomToggleBtn.classList.toggle('is-on', randomOn);
+      const span = els.randomToggleBtn.querySelector('.toggle-state');
+      if (span) {
+        span.textContent = randomOn ? 'On' : 'Off';
+      }
+    }
+
+    if (els.unknownOnlyBtn) {
+      const unknownOn = !!state.unknownOnly;
+      els.unknownOnlyBtn.classList.toggle('is-on', unknownOn);
+      const span = els.unknownOnlyBtn.querySelector('.toggle-state');
+      if (span) {
+        span.textContent = unknownOn ? 'On' : 'Off';
+      }
+    }
   }
 })();
 

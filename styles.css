@@ -61,17 +61,11 @@ body {
 }
 
 .top-bar-left,
-.top-bar-right,
-.top-bar-center {
+.top-bar-right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
-
-.top-bar-center {
-  justify-content: center;
-  flex: 1;
 }
 
 .view-toggle {
@@ -88,18 +82,16 @@ body {
   background: transparent;
   padding: 0.25rem 0.9rem;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--text);
   box-shadow: none;
 }
 
 .view-btn:hover {
   background: rgba(15, 23, 42, 0.95);
-  color: var(--text);
 }
 
 .view-btn.active {
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
-  color: #020617;
+  background: rgba(37, 99, 235, 0.85);
 }
 
 .field {
@@ -186,6 +178,14 @@ input[type='checkbox']:checked::before {
   gap: 1.5rem;
   margin-top: 1.5rem;
   align-items: flex-start;
+}
+
+.main-layout.deck-panel-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.main-layout.deck-panel-collapsed .deck-manager {
+  display: none;
 }
 
 .card-section {
@@ -372,6 +372,34 @@ input[type='checkbox']:checked::before {
 .btn.small {
   padding: 0.35rem 0.9rem;
   font-size: 0.8rem;
+}
+
+.toggles-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.toggle-pill {
+  padding-inline: 0.9rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-pill);
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.toggle-pill .toggle-state {
+  font-weight: 600;
+}
+
+.toggle-pill.is-on {
+  background: radial-gradient(circle at top left, #22c55e 0, #0f172a 55%);
+  border-color: rgba(74, 222, 128, 0.9);
+}
+
+.toggle-pill.is-on .toggle-state {
+  color: var(--success);
 }
 
 .deck-manager {
@@ -591,6 +619,17 @@ input[type='checkbox']:checked::before {
   background: var(--danger-soft);
   color: var(--danger);
   border: 1px solid rgba(248, 113, 113, 0.95);
+}
+
+.deck-toggle-btn {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 50;
+  padding-inline: 0.9rem;
+  font-size: 0.85rem;
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(148, 163, 184, 0.8);
 }
 
 @media (max-width: 900px) {
