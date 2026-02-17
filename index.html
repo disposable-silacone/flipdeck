@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlipDeck – CSV Flashcards</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- PapaParse CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <label class="field">
+          <span class="field-label">Deck</span>
+          <select id="deckSelect"></select>
+        </label>
+        <button id="loadDeckBtn" class="btn primary">Load</button>
+      </div>
+      <div class="top-bar-right">
+        <label class="field toggle-field">
+          <span class="field-label">Shuffle</span>
+          <input type="checkbox" id="shuffleToggle" />
+        </label>
+        <label class="field">
+          <span class="field-label">Topic</span>
+          <select id="topicFilter"></select>
+        </label>
+        <label class="field toggle-field">
+          <span class="field-label">Unknown only</span>
+          <input type="checkbox" id="unknownOnlyToggle" />
+        </label>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section class="card-section">
+        <div class="card-meta">
+          <span id="topicLabel" class="topic-label">Topic</span>
+          <span id="counter" class="counter">0 / 0</span>
+        </div>
+        <div id="card" class="card" tabindex="0" aria-live="polite">
+          <div class="card-inner">
+            <div class="card-face card-front">
+              <div id="cardFrontText" class="card-text">Term</div>
+            </div>
+            <div class="card-face card-back">
+              <div id="cardBackText" class="card-text">Definition</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-hint">Click the card or press Space/Enter to flip.</div>
+
+        <div class="controls">
+          <button id="prevBtn" class="btn tertiary">&larr; Previous</button>
+          <button id="flipBtn" class="btn secondary">Flip</button>
+          <button id="nextBtn" class="btn tertiary">Next &rarr;</button>
+        </div>
+
+        <div class="known-controls">
+          <button id="unknownBtn" class="btn danger">Mark Unknown</button>
+          <button id="knownBtn" class="btn success">Mark Known</button>
+        </div>
+      </section>
+
+      <aside class="deck-manager">
+        <h2>Deck Manager</h2>
+        <div class="field">
+          <label for="deckNameInput" class="field-label">Deck name</label>
+          <input id="deckNameInput" type="text" placeholder="e.g. Biology – Cells" />
+        </div>
+        <div class="field">
+          <label for="csvUrlInput" class="field-label">Google Sheets CSV URL</label>
+          <input id="csvUrlInput" type="url" placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv" />
+        </div>
+        <div class="deck-manager-actions">
+          <button id="saveDeckBtn" class="btn primary">Save deck</button>
+          <button id="deleteDeckBtn" class="btn danger outline">Delete deck</button>
+        </div>
+        <details class="help">
+          <summary>How to get the CSV URL</summary>
+          <ol>
+            <li>In Google Sheets, open your deck sheet.</li>
+            <li>Go to <strong>File → Share → Publish to web…</strong>.</li>
+            <li>Select the tab you want and format <strong>CSV</strong>.</li>
+            <li>Click <strong>Publish</strong> and copy the generated link.</li>
+          </ol>
+        </details>
+        <p class="note">
+          All data is stored locally in your browser using IndexedDB. No data is sent to any server.
+        </p>
+      </aside>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

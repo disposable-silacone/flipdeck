@@ -1,0 +1,216 @@
+
+FLASHCARD APP SPEC – GOOGLE SHEETS CSV (GITHUB PAGES)
+Version: 1.0
+Purpose: Cursor-ready development specification
+
+------------------------------------------------------------
+1. OVERVIEW
+------------------------------------------------------------
+Build a static web app hosted on GitHub Pages that allows the user to:
+- Paste a published Google Sheets CSV link
+- Load flashcards with 3 columns: Topic, Term, Definition
+- Study flashcards one at a time
+- Flip cards on click or button
+- Shuffle deck
+- Navigate next/previous
+- Mark Known / Unknown
+- Filter to Unknown-only
+- Persist all data in-browser between sessions (same device)
+
+No backend. No login. Single-user personal tool.
+
+------------------------------------------------------------
+2. DATA SOURCE FORMAT
+------------------------------------------------------------
+Each Google Sheet tab will be published to web as CSV.
+
+Columns (headers always present but order may vary):
+- Topic
+- Term
+- Definition
+
+Rules:
+- Header names must be detected dynamically (case-insensitive)
+- Ignore blank rows
+- If Topic is blank → treat as "Uncategorized"
+- Support commas, quotes, and special characters
+- Only rows with Term + Definition count as cards
+
+------------------------------------------------------------
+3. USER FLOW
+------------------------------------------------------------
+A. Add Deck
+User pastes:
+- Deck Name
+- Published CSV URL
+
+App stores deck metadata locally.
+
+B. Load Deck
+App fetches CSV → parses → builds cards.
+
+C. Study Mode
+User sees:
+- One card at a time
+- Front = Term
+- Back = Definition
+- Topic label displayed
+
+Controls:
+- Click card to flip
+- Flip button
+- Next / Previous
+- Shuffle toggle
+- Topic filter dropdown
+- Known / Unknown buttons
+- Toggle: "Study Unknown Only"
+
+D. Persistence
+Store locally:
+- Deck list
+- Known/Unknown state per card
+- Last selected deck
+- Shuffle state
+- Topic filter state
+
+Use IndexedDB (preferred).
+
+------------------------------------------------------------
+4. DATA MODEL
+------------------------------------------------------------
+Deck:
+- id
+- name
+- csvUrl
+- createdAt
+- updatedAt
+
+Card:
+- id (hash of term+definition)
+- topic
+- term
+- definition
+- known (boolean)
+
+Settings:
+- lastDeckId
+- shuffleEnabled
+- filterUnknownOnly
+- selectedTopic
+
+------------------------------------------------------------
+5. UI LAYOUT
+------------------------------------------------------------
+Top bar:
+- Deck dropdown
+- Load button
+- Shuffle toggle
+- Topic dropdown
+- Unknown-only toggle
+
+Card area:
+- Large centered card
+- Topic label
+- Term front / Definition back
+
+Controls:
+- Previous
+- Flip
+- Next
+- Known
+- Unknown
+- Counter (12 / 50)
+
+Deck manager section:
+- Deck name input
+- CSV URL input
+- Save deck
+- Delete deck buttons
+
+------------------------------------------------------------
+6. CSV PARSING
+------------------------------------------------------------
+Use PapaParse CDN.
+
+Steps:
+1. Fetch CSV
+2. Parse with header:true
+3. Normalize headers
+4. Validate required fields
+5. Build card objects
+6. Save known states if returning deck
+
+------------------------------------------------------------
+7. STORAGE
+------------------------------------------------------------
+Use IndexedDB database:
+name: flashcards_db
+
+Stores:
+- decks
+- card progress
+- settings
+
+------------------------------------------------------------
+8. KEY FUNCTIONS
+------------------------------------------------------------
+init()
+addDeck()
+deleteDeck()
+loadDeck()
+fetchCsv()
+parseCsv()
+renderCard()
+flipCard()
+nextCard()
+prevCard()
+toggleKnown()
+toggleUnknown()
+applyFilters()
+shuffleCards()
+saveState()
+loadState()
+
+------------------------------------------------------------
+9. ACCEPTANCE CRITERIA
+------------------------------------------------------------
+- User can add deck via URL
+- Deck persists after refresh
+- Cards load correctly
+- Topics filter works
+- Known/Unknown persists
+- Unknown-only filter works across sessions
+- Shuffle works
+- Handles quotes/commas correctly
+
+------------------------------------------------------------
+10. GITHUB + CURSOR SETUP INSTRUCTIONS
+------------------------------------------------------------
+Step 1 – Create GitHub Repo
+1. Go to github.com
+2. Click New Repository
+3. Name: flashcards
+4. Public repo
+5. Create repository
+
+Step 2 – Open in Cursor
+1. Open Cursor
+2. Clone repo from GitHub
+3. Open folder
+
+Step 3 – Give Cursor this spec
+Paste this file into Cursor and say:
+"Build this entire app according to the spec."
+
+Step 4 – Enable GitHub Pages
+1. Go to repo Settings
+2. Pages
+3. Deploy from main branch
+4. Root folder
+5. Save
+
+Your app will be live at:
+https://YOURUSERNAME.github.io/flashcards
+
+------------------------------------------------------------
+END SPEC
