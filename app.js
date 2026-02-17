@@ -22,6 +22,7 @@
     shuffleEnabled: false,
     unknownOnly: false,
     selectedTopic: 'ALL',
+    viewMode: 'study', // 'study' | 'overview'
     cardProgressMap: new Map(), // key: cardId, value: { known: boolean }
   };
 
@@ -66,6 +67,9 @@
     els.topicFilter = document.getElementById('topicFilter');
     els.unknownOnlyToggle = document.getElementById('unknownOnlyToggle');
 
+    els.studyViewBtn = document.getElementById('studyViewBtn');
+    els.overviewViewBtn = document.getElementById('overviewViewBtn');
+
     els.card = document.getElementById('card');
     els.cardFrontText = document.getElementById('cardFrontText');
     els.cardBackText = document.getElementById('cardBackText');
@@ -84,6 +88,17 @@
     els.deleteDeckBtn = document.getElementById('deleteDeckBtn');
 
     els.toast = document.getElementById('toast');
+
+    // Overview
+    els.studySection = document.getElementById('studySection');
+    els.overviewSection = document.getElementById('overviewSection');
+    els.overviewDeckSelect = document.getElementById('overviewDeckSelect');
+    els.metricTotalCards = document.getElementById('metricTotalCards');
+    els.metricKnown = document.getElementById('metricKnown');
+    els.metricUnknown = document.getElementById('metricUnknown');
+    els.metricKnownPercent = document.getElementById('metricKnownPercent');
+    els.topicStatsBody = document.getElementById('topicStatsBody');
+    els.cardsTableBody = document.getElementById('cardsTableBody');
   }
 
   function attachEventListeners() {
@@ -118,6 +133,9 @@
       applyFilters();
     });
 
+    els.studyViewBtn.addEventListener('click', () => setViewMode('study'));
+    els.overviewViewBtn.addEventListener('click', () => setViewMode('overview'));
+
     els.card.addEventListener('click', () => {
       flipCard();
     });
@@ -144,6 +162,19 @@
 
     els.saveDeckBtn.addEventListener('click', () => addDeck());
     els.deleteDeckBtn.addEventListener('click', () => deleteDeck());
+
+    if (els.overviewDeckSelect) {
+      els.overviewDeckSelect.addEventListener('change', () => {
+        const deckId = els.overviewDeckSelect.value;
+        if (!deckId) return;
+        // This will also make it the active study deck
+        loadDeck(deckId).then(() => {
+          if (state.viewMode === 'overview') {
+            renderOverview();
+          }
+        });
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -305,6 +336,25 @@
         opt.textContent = deck.name;
         els.deckSelect.appendChild(opt);
       });
+
+    // Mirror decks into overview selector
+    if (els.overviewDeckSelect) {
+      els.overviewDeckSelect.innerHTML = '';
+      const allPlaceholder = document.createElement('option');
+      allPlaceholder.value = '';
+      allPlaceholder.textContent = 'Select a deck…';
+      els.overviewDeckSelect.appendChild(allPlaceholder);
+
+      state.decks
+        .slice()
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+        .forEach((deck) => {
+          const opt = document.createElement('option');
+          opt.value = deck.id;
+          opt.textContent = deck.name;
+          els.overviewDeckSelect.appendChild(opt);
+        });
+    }
   }
 
   function addDeck() {
@@ -395,7 +445,7 @@
     state.currentDeck = deck;
     showToast('Loading deck…');
 
-    Promise.all([
+    return Promise.all([
       fetchCsv(deck.csvUrl),
       loadCardProgressForDeck(deck.id),
     ])
@@ -423,6 +473,13 @@
       })
       .then(() => {
         showToast('Deck loaded.');
+        // Sync overview deck selector with current deck
+        if (els.overviewDeckSelect) {
+          els.overviewDeckSelect.value = deck.id;
+        }
+        if (state.viewMode === 'overview') {
+          renderOverview();
+        }
       })
       .catch((err) => {
         console.error('Failed to load deck', err);
@@ -556,6 +613,10 @@
 
     state.isFlipped = false;
     renderCard();
+
+    if (state.viewMode === 'overview') {
+      renderOverview();
+    }
   }
 
   function renderCard() {
@@ -632,6 +693,10 @@
     );
 
     renderCard();
+
+    if (state.viewMode === 'overview') {
+      renderOverview();
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -650,6 +715,135 @@
     els.shuffleToggle.checked = !!state.shuffleEnabled;
     els.unknownOnlyToggle.checked = !!state.unknownOnly;
     // topic dropdown is wired during buildTopicFilterOptions
+  }
+
+  // ---------------------------------------------------------------------------
+  // View mode & overview rendering
+  // ---------------------------------------------------------------------------
+
+  function setViewMode(mode) {
+    if (mode !== 'study' && mode !== 'overview') return;
+    state.viewMode = mode;
+
+    if (mode === 'study') {
+      els.studySection.classList.remove('hidden');
+      els.overviewSection.classList.add('hidden');
+      els.studyViewBtn.classList.add('active');
+      els.overviewViewBtn.classList.remove('active');
+    } else {
+      els.studySection.classList.add('hidden');
+      els.overviewSection.classList.remove('hidden');
+      els.studyViewBtn.classList.remove('active');
+      els.overviewViewBtn.classList.add('active');
+
+      // Ensure overview selector matches current deck
+      if (state.currentDeck && els.overviewDeckSelect) {
+        els.overviewDeckSelect.value = state.currentDeck.id;
+      }
+      renderOverview();
+    }
+  }
+
+  function renderOverview() {
+    if (!state.currentDeck) {
+      // Clear metrics and tables when no deck is selected
+      setMetricText(0, 0, 0, 0);
+      clearElement(els.topicStatsBody);
+      clearElement(els.cardsTableBody);
+      return;
+    }
+
+    const cards = state.cards;
+    const total = cards.length;
+    const knownCount = cards.filter((c) => c.known).length;
+    const unknownCount = total - knownCount;
+    const knownPercent = total ? Math.round((knownCount / total) * 100) : 0;
+
+    setMetricText(total, knownCount, unknownCount, knownPercent);
+    renderTopicStats(cards);
+    renderCardsTable(cards);
+  }
+
+  function setMetricText(total, known, unknown, percent) {
+    if (!els.metricTotalCards) return;
+    els.metricTotalCards.textContent = String(total);
+    els.metricKnown.textContent = String(known);
+    els.metricUnknown.textContent = String(unknown);
+    els.metricKnownPercent.textContent = `${percent}%`;
+  }
+
+  function renderTopicStats(cards) {
+    if (!els.topicStatsBody) return;
+    clearElement(els.topicStatsBody);
+
+    const byTopic = new Map();
+    cards.forEach((card) => {
+      const topic = card.topic || 'Uncategorized';
+      const entry = byTopic.get(topic) || { total: 0, known: 0 };
+      entry.total += 1;
+      if (card.known) entry.known += 1;
+      byTopic.set(topic, entry);
+    });
+
+    const topics = Array.from(byTopic.entries()).sort(([a], [b]) =>
+      a.localeCompare(b)
+    );
+
+    topics.forEach(([topic, stats]) => {
+      const unknown = stats.total - stats.known;
+      const percent = stats.total
+        ? Math.round((stats.known / stats.total) * 100)
+        : 0;
+
+      const tr = document.createElement('tr');
+      tr.classList.add('topic-row');
+      tr.innerHTML = `
+        <td>${escapeHtml(topic)}</td>
+        <td>${stats.total}</td>
+        <td>${stats.known}</td>
+        <td>${unknown}</td>
+        <td>${percent}%</td>
+      `;
+      tr.addEventListener('click', () => jumpToStudyForTopic(topic));
+      els.topicStatsBody.appendChild(tr);
+    });
+  }
+
+  function renderCardsTable(cards) {
+    if (!els.cardsTableBody) return;
+    clearElement(els.cardsTableBody);
+
+    cards.forEach((card) => {
+      const tr = document.createElement('tr');
+      const badgeClass = card.known ? 'badge-known' : 'badge-unknown';
+      const badgeText = card.known ? 'Known' : 'Unknown';
+
+      tr.innerHTML = `
+        <td>${escapeHtml(card.topic || 'Uncategorized')}</td>
+        <td>${escapeHtml(card.term)}</td>
+        <td>${escapeHtml(card.definition)}</td>
+        <td><span class="${badgeClass}">${badgeText}</span></td>
+      `;
+
+      els.cardsTableBody.appendChild(tr);
+    });
+  }
+
+  function jumpToStudyForTopic(topic) {
+    // Switch to study view
+    setViewMode('study');
+
+    // Update topic filter
+    state.selectedTopic = topic;
+    if (els.topicFilter) {
+      els.topicFilter.value = topic;
+    }
+    applyFilters();
+
+    // Scroll to card section
+    if (els.studySection && typeof els.studySection.scrollIntoView === 'function') {
+      els.studySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -673,6 +867,23 @@
       [copy[i], copy[j]] = [copy[j], copy[i]];
     }
     return copy;
+  }
+
+  function clearElement(node) {
+    if (!node) return;
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function showToast(message) {

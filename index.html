@@ -18,6 +18,12 @@
         </label>
         <button id="loadDeckBtn" class="btn primary">Load</button>
       </div>
+      <div class="top-bar-center">
+        <div class="view-toggle">
+          <button id="studyViewBtn" class="btn tertiary view-btn active">Study</button>
+          <button id="overviewViewBtn" class="btn tertiary view-btn">Overview</button>
+        </div>
+      </div>
       <div class="top-bar-right">
         <label class="field toggle-field">
           <span class="field-label">Shuffle</span>
@@ -35,7 +41,7 @@
     </header>
 
     <main class="main-layout">
-      <section class="card-section">
+      <section id="studySection" class="card-section">
         <div class="card-meta">
           <span id="topicLabel" class="topic-label">Topic</span>
           <span id="counter" class="counter">0 / 0</span>
@@ -61,6 +67,81 @@
         <div class="known-controls">
           <button id="unknownBtn" class="btn danger">Mark Unknown</button>
           <button id="knownBtn" class="btn success">Mark Known</button>
+        </div>
+      </section>
+
+      <section id="overviewSection" class="overview-section hidden">
+        <div class="overview-header">
+          <div class="field">
+            <label for="overviewDeckSelect" class="field-label">Deck overview</label>
+            <select id="overviewDeckSelect"></select>
+          </div>
+        </div>
+
+        <div class="overview-content">
+          <section class="overview-block">
+            <h2>Deck summary</h2>
+            <div class="overview-metrics">
+              <div class="metric">
+                <div class="metric-label">Total cards</div>
+                <div id="metricTotalCards" class="metric-value">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Known</div>
+                <div id="metricKnown" class="metric-value">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Unknown</div>
+                <div id="metricUnknown" class="metric-value">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Known %</div>
+                <div id="metricKnownPercent" class="metric-value">0%</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="overview-block">
+            <h2>By topic</h2>
+            <p class="overview-caption">
+              Click a topic row to jump back to Study mode filtered by that topic.
+            </p>
+            <div class="table-wrapper">
+              <table class="overview-table">
+                <thead>
+                  <tr>
+                    <th>Topic</th>
+                    <th>Total</th>
+                    <th>Known</th>
+                    <th>Unknown</th>
+                    <th>Known %</th>
+                  </tr>
+                </thead>
+                <tbody id="topicStatsBody">
+                  <!-- Filled by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="overview-block">
+            <h2>All cards</h2>
+            <div class="table-wrapper">
+              <table class="overview-table">
+                <thead>
+                  <tr>
+                    <th>Topic</th>
+                    <th>Term</th>
+                    <th>Definition</th>
+                    <th>Known?</th>
+                  </tr>
+                </thead>
+                <tbody id="cardsTableBody">
+                  <!-- Filled by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </section>
 
