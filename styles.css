@@ -369,6 +369,11 @@ input[type='checkbox']:checked::before {
   border-color: rgba(248, 113, 113, 0.8);
 }
 
+.btn.small {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+}
+
 .deck-manager {
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), #020617 68%);
   border-radius: clamp(20px, 3vw, 26px);

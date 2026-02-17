@@ -99,6 +99,7 @@
     els.metricKnownPercent = document.getElementById('metricKnownPercent');
     els.topicStatsBody = document.getElementById('topicStatsBody');
     els.cardsTableBody = document.getElementById('cardsTableBody');
+    els.resetStatsBtn = document.getElementById('resetStatsBtn');
   }
 
   function attachEventListeners() {
@@ -173,6 +174,12 @@
             renderOverview();
           }
         });
+      });
+    }
+
+    if (els.resetStatsBtn) {
+      els.resetStatsBtn.addEventListener('click', () => {
+        resetCurrentDeckStats();
       });
     }
   }
@@ -844,6 +851,47 @@
     if (els.studySection && typeof els.studySection.scrollIntoView === 'function') {
       els.studySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  function resetCurrentDeckStats() {
+    if (!state.currentDeck) {
+      showToast('No deck selected.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Reset all Known/Unknown stats for this deck? This cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    const deckId = state.currentDeck.id;
+
+    // Clear progress in IndexedDB for this deck
+    deleteProgressForDeckFromDb(deckId)
+      .then(() => {
+        // Reset in-memory state
+        state.cards.forEach((card) => {
+          card.known = false;
+        });
+        state.filteredCards.forEach((card) => {
+          card.known = false;
+        });
+        state.cardProgressMap.clear();
+
+        // Persist reset state (optional but keeps stores in sync)
+        return saveCardProgressForCurrentDeck();
+      })
+      .then(() => {
+        renderCard();
+        if (state.viewMode === 'overview') {
+          renderOverview();
+        }
+        showToast('Deck stats reset.');
+      })
+      .catch((err) => {
+        console.error('Failed to reset stats', err);
+        showToast('Failed to reset stats. Check console for details.');
+      });
   }
 
   // ---------------------------------------------------------------------------
