@@ -17,7 +17,7 @@ There is **no backend and no build step** – it works directly on GitHub Pages.
   - Front: **Term**, Back: **Definition**
   - Flip by clicking the card, `Space`, or `Enter`
   - Previous / Next navigation with buttons or ← / → arrow keys
-  - Shuffle toggle
+  - Random toggle (pick a random card each time)
   - Topic filter dropdown
   - Known / Unknown buttons
   - Toggle: **Study Unknown Only**
@@ -123,8 +123,8 @@ You’ll then see the first card:
   - Click **Mark Known** when you know a card.
   - Click **Mark Unknown** when you don’t.
   - This state is saved in IndexedDB per card and deck.
-- **Shuffle toggle**
-  - Turn on to view cards in random order.
+- **Random toggle**
+  - When ON, each Next/Previous jump picks a random card from the current filtered set (topic + unknown-only).
   - State is remembered across sessions.
 - **Topic dropdown**
   - Choose a specific topic to study only that group.

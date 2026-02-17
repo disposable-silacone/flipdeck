@@ -549,16 +549,12 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Filters, shuffle, and rendering
+  // Filters, random, and rendering
   // ---------------------------------------------------------------------------
 
   function rebuildWorkingSet() {
-    // Start from all cards; shuffle if enabled
-    let working = state.cards.slice();
-    if (state.shuffleEnabled) {
-      working = shuffleArray(working);
-    }
-    state.filteredCards = working;
+    // Start from all cards in their natural order
+    state.filteredCards = state.cards.slice();
   }
 
   function buildTopicFilterOptions() {
@@ -599,10 +595,6 @@
 
   function applyFilters() {
     let cards = state.cards.slice();
-
-    if (state.shuffleEnabled) {
-      cards = shuffleArray(cards);
-    }
 
     if (state.selectedTopic && state.selectedTopic !== 'ALL') {
       cards = cards.filter((c) => c.topic === state.selectedTopic);
@@ -666,17 +658,14 @@
 
   function nextCard() {
     if (!state.filteredCards.length) return;
-    state.currentIndex =
-      (state.currentIndex + 1) % Math.max(state.filteredCards.length, 1);
+    state.currentIndex = getNextIndex();
     state.isFlipped = false;
     renderCard();
   }
 
   function prevCard() {
     if (!state.filteredCards.length) return;
-    state.currentIndex =
-      (state.currentIndex - 1 + state.filteredCards.length) %
-      Math.max(state.filteredCards.length, 1);
+    state.currentIndex = getPrevIndex();
     state.isFlipped = false;
     renderCard();
   }
@@ -908,13 +897,36 @@
     return `c_${Math.abs(hash)}`;
   }
 
-  function shuffleArray(arr) {
-    const copy = arr.slice();
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
+  function getNextIndex() {
+    const len = state.filteredCards.length;
+    if (!len) return 0;
+
+    if (!state.shuffleEnabled) {
+      return (state.currentIndex + 1) % len;
     }
-    return copy;
+
+    // Random mode: pick a random index, try to avoid repeating the same card
+    let next = Math.floor(Math.random() * len);
+    if (len > 1 && next === state.currentIndex) {
+      next = (next + 1) % len;
+    }
+    return next;
+  }
+
+  function getPrevIndex() {
+    const len = state.filteredCards.length;
+    if (!len) return 0;
+
+    if (!state.shuffleEnabled) {
+      return (state.currentIndex - 1 + len) % len;
+    }
+
+    // In random mode, previous also just jumps to another random card
+    let prev = Math.floor(Math.random() * len);
+    if (len > 1 && prev === state.currentIndex) {
+      prev = (prev + 1) % len;
+    }
+    return prev;
   }
 
   function clearElement(node) {
