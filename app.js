@@ -195,10 +195,10 @@
     if (els.deckPanelToggle && els.mainLayout) {
       els.deckPanelToggle.addEventListener('click', () => {
         const collapsed = els.mainLayout.classList.toggle('deck-panel-collapsed');
-        els.deckPanelToggle.textContent = collapsed ? 'Show decks' : 'Hide decks';
+        els.deckPanelToggle.textContent = collapsed ? 'ADD decks' : 'Hide decks';
       });
       const initiallyCollapsed = els.mainLayout.classList.contains('deck-panel-collapsed');
-      els.deckPanelToggle.textContent = initiallyCollapsed ? 'Show decks' : 'Hide decks';
+      els.deckPanelToggle.textContent = initiallyCollapsed ? 'ADD decks' : 'Hide decks';
     }
   }
 
