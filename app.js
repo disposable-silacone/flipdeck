@@ -397,7 +397,7 @@
     const csvUrl = (els.csvUrlInput.value || '').trim();
 
     if (!name || !csvUrl) {
-      showToast('Deck name and CSV URL are required.');
+      showToast('Deck name and Google Sheets URL are required.');
       return;
     }
 
@@ -522,8 +522,45 @@
       });
   }
 
+  /**
+   * Normalize Google Sheets URL to CSV format.
+   * Supports both "Publish to web" as CSV and as Web page (pubhtml).
+   */
+  function normalizeToCsvUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    const trimmed = url.trim();
+    if (trimmed.includes('output=csv')) return trimmed;
+
+    try {
+      const u = new URL(trimmed);
+      const path = u.pathname;
+
+      // pubhtml (web page) -> pub?output=csv
+      if (path.endsWith('/pubhtml')) {
+        u.pathname = path.replace(/\/pubhtml$/, '/pub');
+        u.searchParams.set('output', 'csv');
+        u.searchParams.set('gid', u.searchParams.get('gid') || '0');
+        u.searchParams.set('single', u.searchParams.get('single') || 'true');
+        return u.toString();
+      }
+
+      // /pub without output=csv (web page default) -> add output=csv
+      if (path.includes('/pub') && !u.searchParams.has('output')) {
+        u.searchParams.set('output', 'csv');
+        if (!u.searchParams.has('gid')) u.searchParams.set('gid', '0');
+        if (!u.searchParams.has('single')) u.searchParams.set('single', 'true');
+        return u.toString();
+      }
+
+      return trimmed;
+    } catch {
+      return trimmed;
+    }
+  }
+
   function fetchCsv(url) {
-    return fetch(url, { cache: 'no-store' }).then((response) => {
+    const csvUrl = normalizeToCsvUrl(url);
+    return fetch(csvUrl, { cache: 'no-store' }).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
