@@ -156,10 +156,20 @@
         flipCard();
       }
       if (e.key === 'ArrowRight') {
+        e.preventDefault();
         nextCard();
       }
       if (e.key === 'ArrowLeft') {
+        e.preventDefault();
         prevCard();
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setKnownState(true);
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setKnownState(false);
       }
     });
 
