@@ -205,10 +205,10 @@
     if (els.deckPanelToggle && els.mainLayout) {
       els.deckPanelToggle.addEventListener('click', () => {
         const collapsed = els.mainLayout.classList.toggle('deck-panel-collapsed');
-        els.deckPanelToggle.textContent = collapsed ? 'ADD decks' : 'Hide decks';
+        els.deckPanelToggle.textContent = collapsed ? 'ADD decks' : 'Hide Deck Manager';
       });
       const initiallyCollapsed = els.mainLayout.classList.contains('deck-panel-collapsed');
-      els.deckPanelToggle.textContent = initiallyCollapsed ? 'ADD decks' : 'Hide decks';
+      els.deckPanelToggle.textContent = initiallyCollapsed ? 'ADD decks' : 'Hide Deck Manager';
     }
   }
 
